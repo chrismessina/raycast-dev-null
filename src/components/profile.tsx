@@ -1,7 +1,7 @@
 import { countOf, showError } from "@chrismessina/raycast-kit";
 import { logger } from "@chrismessina/raycast-logger";
 import { useState, type ReactNode } from "react";
-import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
+import { Action, ActionPanel, environment, Icon, Image, Keyboard, List } from "@raycast/api";
 import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getConnections, getUser, getUserCommits, type Commit, type User } from "../lib/api";
 
@@ -12,9 +12,12 @@ const avatar = (user: User): Image.ImageLike =>
 
 const date = (iso: string | undefined) => (iso ? new Date(iso) : undefined);
 
-/** Whether a view shows its detail pane, remembered per view, and the action on every row that flips it (⌘⇧D). */
+/**
+ * Whether a view shows its detail pane, remembered per command and view, and the action on every row that flips it
+ * (⌘⇧D). Raycast's cache is shared by every command, so the key names the command.
+ */
 export function useSidebar(view: string): { show: boolean; action: ReactNode } {
-  const [show, setShow] = useCachedState<boolean>(`show-detail-${view}`, true);
+  const [show, setShow] = useCachedState<boolean>(`show-detail-${environment.commandName}-${view}`, true);
   const action = (
     <Action
       title={show ? "Hide Sidebar" : "Show Sidebar"}
