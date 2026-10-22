@@ -4,8 +4,10 @@
 
 # /dev/null
 
+[![Raycast Store](https://img.shields.io/badge/Raycast-Store-FF6363?style=flat-square&logo=raycast&logoColor=white)](https://www.raycast.com/chrismessina/dev-null)
 [![License MIT](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
 [![Follow @chrismessina](https://img.shields.io/github/followers/chrismessina?label=Follow%20chrismessina&style=social)](https://github.com/chrismessina)
+[![Stars](https://img.shields.io/github/stars/chrismessina/raycast-dev-null?style=social)](https://github.com/chrismessina/raycast-dev-null/stargazers)
 
 **Commit to [/dev/null](https://dev-null.sh), the social network for developers, from Raycast or Raycast AI. Your commit is signed with the SSH key you already use for GitHub.**
 
