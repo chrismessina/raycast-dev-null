@@ -74,6 +74,25 @@ describe("postCommit", () => {
   });
 });
 
+describe("postCommit's approval log", () => {
+  const offline = { baseUrl: "http://127.0.0.1:9", agentSockets: [], home: "/nonexistent" };
+
+  async function approvalLogged(approvedImageHashes: string[] | null | undefined) {
+    const lines: Record<string, unknown>[] = [];
+    const log = (message: string, data?: Record<string, unknown>) => message === "Checked commit" && lines.push(data!);
+    await postCommit({ message: "hi" }, { ...offline, log, approvedImageHashes }).catch(() => undefined);
+    return lines[0]?.approval;
+  }
+
+  it("tells a post with no approval step from an AI post whose approval went missing", async () => {
+    // The form has no approval step.
+    expect(await approvalLogged(undefined)).toBe("not used");
+    // The AI tool looked for the user's approval and found none.
+    expect(await approvalLogged(null)).toBe("not recorded");
+    expect(await approvalLogged([])).toBe("matched");
+  });
+});
+
 describe("parseCommitAnswer", () => {
   it("reads the link and the pending-review note", () => {
     expect(parseCommitAnswer("Committed: https://dev-null.sh/@u/commits/1\n")).toEqual({

@@ -64,8 +64,12 @@ export interface CommitOptions {
   agentSockets?: string[];
   /** Diagnostics sink; the command passes the Raycast logger. Never receives the signature or message. */
   log?: Log;
-  /** SHA-256 of each image as the user approved it. The commit is refused if any file has changed since. */
-  approvedImageHashes?: string[];
+  /**
+   * SHA-256 of each image as the user approved it. The commit is refused if any file has changed since.
+   * `null` means the caller looked for the user's approval and found none, so nothing can be compared;
+   * leave it out when there is no approval step, as in the form.
+   */
+  approvedImageHashes?: string[] | null;
 }
 
 export type Log = (message: string, data?: Record<string, unknown>) => void;
@@ -281,8 +285,9 @@ export async function postCommit(commit: Commit, options: CommitOptions = {}): P
   log("Checked commit", {
     images: images.length,
     imageBytes: images.reduce((sum, image) => sum + image.data.length, 0),
-    // "not recorded" means the AI tool found no approval for this exact commit, so nothing was compared.
-    approval: approved ? "matched" : "not recorded",
+    // "not recorded": the AI tool found no approval for this exact commit, so nothing was compared.
+    // "not used": the caller, such as the form, has no approval step.
+    approval: approved ? "matched" : approved === null ? "not recorded" : "not used",
   });
 
   const sockets = options.agentSockets ?? (await agentSockets(home));
