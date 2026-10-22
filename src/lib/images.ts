@@ -160,7 +160,7 @@ export async function loadImages(paths: string[]): Promise<Image[]> {
     if (!size2d) throw new Error(`Could not read the dimensions of ${name}.`);
     if (size2d.width > MAX_IMAGE_DIMENSION || size2d.height > MAX_IMAGE_DIMENSION) {
       throw new Error(
-        `${name} is ${size2d.width}×${size2d.height}. Images can be at most ${MAX_IMAGE_DIMENSION.toLocaleString("en-US")} pixels on a side.`,
+        `${name} is ${size2d.width}×${size2d.height}. Images can be at most ${MAX_IMAGE_DIMENSION.toLocaleString()} pixels on a side.`,
       );
     }
 

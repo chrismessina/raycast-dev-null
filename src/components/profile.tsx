@@ -1,8 +1,8 @@
 import { countOf, showError } from "@chrismessina/raycast-kit";
 import { logger } from "@chrismessina/raycast-logger";
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { Action, ActionPanel, Icon, Image, Keyboard, List } from "@raycast/api";
-import { useCachedPromise } from "@raycast/utils";
+import { useCachedPromise, useCachedState } from "@raycast/utils";
 import { getConnections, getUser, getUserCommits, type Commit, type User } from "../lib/api";
 
 const log = (message: string, data?: Record<string, unknown>) => logger.log(message, data);
@@ -12,6 +12,20 @@ const avatar = (user: User): Image.ImageLike =>
 
 const date = (iso: string | undefined) => (iso ? new Date(iso) : undefined);
 
+/** Whether a view shows its detail pane, remembered per view, and the action on every row that flips it (⌘⇧D). */
+export function useSidebar(view: string): { show: boolean; action: ReactNode } {
+  const [show, setShow] = useCachedState<boolean>(`show-detail-${view}`, true);
+  const action = (
+    <Action
+      title={show ? "Hide Sidebar" : "Show Sidebar"}
+      icon={Icon.AppWindowSidebarRight}
+      shortcut={{ modifiers: ["cmd", "shift"], key: "d" }}
+      onAction={() => setShow((current) => !current)}
+    />
+  );
+  return { show, action };
+}
+
 function commitMarkdown(commit: Commit): string {
   const parts = [commit.body];
   for (const image of commit.images ?? []) parts.push(`![${image.description ?? ""}](${image.url})`);
@@ -20,7 +34,15 @@ function commitMarkdown(commit: Commit): string {
   return parts.join("\n\n");
 }
 
-export function CommitItem({ commit, showAuthor }: { commit: Commit; showAuthor: boolean }) {
+export function CommitItem({
+  commit,
+  showAuthor,
+  sidebarAction,
+}: {
+  commit: Commit;
+  showAuthor: boolean;
+  sidebarAction: ReactNode;
+}) {
   const { author } = commit;
   return (
     <List.Item
@@ -67,6 +89,7 @@ export function CommitItem({ commit, showAuthor }: { commit: Commit; showAuthor:
             shortcut={Keyboard.Shortcut.Common.Copy}
           />
           <Action.CopyToClipboard title="Copy Commit Text" content={commit.body} />
+          {sidebarAction}
         </ActionPanel>
       }
     />
@@ -149,7 +172,7 @@ function ProfileDetail({ user }: { user: User }) {
   );
 }
 
-function ProfileSection({ user }: { user: User }) {
+function ProfileSection({ user, sidebarAction }: { user: User; sidebarAction: ReactNode }) {
   const profileActions = (
     <>
       <Action.OpenInBrowser title="Open Profile in Browser" url={user.html_url} />
@@ -158,6 +181,7 @@ function ProfileSection({ user }: { user: User }) {
         content={user.html_url}
         shortcut={Keyboard.Shortcut.Common.Copy}
       />
+      {sidebarAction}
     </>
   );
   const connection = (kind: "followers" | "following", count: number | undefined) => (
@@ -171,8 +195,8 @@ function ProfileSection({ user }: { user: User }) {
             count === undefined
               ? ""
               : kind === "followers"
-                ? `${countOf(count, "person", { plural: "people" })} follow @${user.username}.`
-                : `@${user.username} follows ${countOf(count, "person", { plural: "people" })}.`
+                ? `${countOf(count, "person", { plural: "people", zero: "No one" })} ${count > 1 ? "follow" : "follows"} @${user.username}.`
+                : `@${user.username} follows ${countOf(count, "person", { plural: "people", zero: "no one" })}.`
           }
         />
       }
@@ -217,6 +241,7 @@ export function Profile({
   navigationTitle?: string;
 }) {
   const [show, setShow] = useState<"commits" | "replies">("commits");
+  const sidebar = useSidebar("profile");
   const user = useCachedPromise((name: string) => getUser(name, log), [username], {
     onError: (error) => void showError(error, { title: "Couldn't Load Profile" }),
   });
@@ -235,7 +260,7 @@ export function Profile({
   return (
     <List
       isLoading={user.isLoading || commits.isLoading}
-      isShowingDetail={!user.error}
+      isShowingDetail={!user.error && sidebar.show}
       pagination={commits.pagination}
       navigationTitle={navigationTitle ?? `@${username}`}
       searchBarPlaceholder={show === "replies" ? "Filter replies" : "Filter commits"}
@@ -250,10 +275,10 @@ export function Profile({
         <List.EmptyView icon={Icon.PersonCircle} title={user.error.message} />
       ) : (
         <>
-          {!commitsOnly && user.data && <ProfileSection user={user.data} />}
+          {!commitsOnly && user.data && <ProfileSection user={user.data} sidebarAction={sidebar.action} />}
           <List.Section title={show === "replies" ? "Replies" : "Commits"}>
             {commits.data?.map((commit) => (
-              <CommitItem key={commit.id} commit={commit} showAuthor={false} />
+              <CommitItem key={commit.id} commit={commit} showAuthor={false} sidebarAction={sidebar.action} />
             ))}
           </List.Section>
         </>

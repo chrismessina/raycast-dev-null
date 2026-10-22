@@ -35,7 +35,9 @@ describe("postCommit", () => {
   const offline = { baseUrl: "http://127.0.0.1:9", agentSockets: [], home: "/nonexistent" };
 
   it("refuses a commit /dev/null would refuse before looking for keys or sending anything", async () => {
-    await expect(postCommit({ message: "x".repeat(4001) }, offline)).rejects.toThrow("4,001 of 4,000");
+    await expect(postCommit({ message: "x".repeat(4001) }, offline)).rejects.toThrow(
+      `${(4001).toLocaleString()} of ${(4000).toLocaleString()}`,
+    );
     await expect(postCommit({ message: "hi", imagePaths: ["/nonexistent/a.png"] }, offline)).rejects.toThrow(
       "Could not read the image a.png.",
     );

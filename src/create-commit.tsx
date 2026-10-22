@@ -24,7 +24,7 @@ import { postCommit } from "./lib/devnull";
 import { loadImages, MAX_IMAGES } from "./lib/images";
 import { rememberUsername } from "./username";
 
-const limit = MAX_BODY_LENGTH.toLocaleString("en-US");
+const limit = MAX_BODY_LENGTH.toLocaleString();
 // Image data from the clipboard is saved here as PNG files, so it can be attached like any other image.
 const PASTED_DIR = join(environment.supportPath, "pasted");
 // ⌘V stays with the message field: Raycast gives an extension no paste event, so an action on ⌘V would take text
@@ -185,7 +185,7 @@ export default function Command() {
   return (
     <Form
       isLoading={isCommitting}
-      navigationTitle={`${bodyCharacterCount(draft).toLocaleString("en-US")} of ${limit}`}
+      navigationTitle={`${bodyCharacterCount(draft).toLocaleString()} of ${limit}`}
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Upload} title="Commit" onSubmit={handleSubmit} />

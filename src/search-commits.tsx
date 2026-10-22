@@ -3,7 +3,7 @@ import { logger } from "@chrismessina/raycast-logger";
 import { useEffect, useState } from "react";
 import { Icon, List } from "@raycast/api";
 import { useCachedPromise } from "@raycast/utils";
-import { CommitItem } from "./components/profile";
+import { CommitItem, useSidebar } from "./components/profile";
 import { searchCommits } from "./lib/api";
 
 const log = (message: string, data?: Record<string, unknown>) => logger.log(message, data);
@@ -16,6 +16,7 @@ const MINIMUM_TERM_LENGTH = 3;
 export default function Command() {
   const [text, setText] = useState("");
   const [term, setTerm] = useState("");
+  const sidebar = useSidebar("search-commits");
   useEffect(() => {
     const timer = setTimeout(() => setTerm(text.trim()), TYPING_PAUSE_MS);
     return () => clearTimeout(timer);
@@ -35,7 +36,7 @@ export default function Command() {
   return (
     <List
       isLoading={isLoading || text.trim() !== term}
-      isShowingDetail={results.length > 0}
+      isShowingDetail={results.length > 0 && sidebar.show}
       searchText={text}
       onSearchTextChange={setText}
       searchBarPlaceholder="Search commits"
@@ -54,7 +55,7 @@ export default function Command() {
             <List.EmptyView icon={Icon.Message} title={`No commits match “${term}”`} />
           )}
           {results.map((commit) => (
-            <CommitItem key={commit.id} commit={commit} showAuthor />
+            <CommitItem key={commit.id} commit={commit} showAuthor sidebarAction={sidebar.action} />
           ))}
         </>
       )}

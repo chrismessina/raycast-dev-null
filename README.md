@@ -139,6 +139,7 @@ In a profile or a list of commits:
 | Open Commit / View Profile | `⏎` | Open the commit on /dev/null, or the person's profile |
 | Copy Commit URL / Copy Profile URL | `⌘ ⇧ C` | Copy the link |
 | Show | Dropdown | Switch between commits and replies |
+| Hide Sidebar / Show Sidebar | `⌘ ⇧ D` | Hide or show the detail pane; remembered per command |
 
 ### Preferences
 
