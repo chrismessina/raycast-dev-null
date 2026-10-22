@@ -1,11 +1,23 @@
 import { failToast, showError } from "@chrismessina/raycast-kit";
 import { logger } from "@chrismessina/raycast-logger";
 import { useEffect, useRef, useState } from "react";
-import { Action, ActionPanel, Form, Icon, Keyboard, open, showToast, Toast } from "@raycast/api";
+import {
+  Action,
+  ActionPanel,
+  Form,
+  getPreferenceValues,
+  getSelectedText,
+  Icon,
+  Keyboard,
+  open,
+  showToast,
+  Toast,
+} from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { bodyCharacterCount, bodyError, MAX_BODY_LENGTH } from "./lib/body";
 import { postCommit } from "./lib/devnull";
 import { loadImages, MAX_IMAGES } from "./lib/images";
+import { rememberUsername } from "./username";
 
 const limit = MAX_BODY_LENGTH.toLocaleString("en-US");
 
@@ -27,6 +39,23 @@ export default function Command() {
   latest.current = { draft, imagePaths };
 
   const bodyProblem = draft.trim() ? bodyError(draft) : emptyError;
+
+  // With the preference on, the selection goes into the commit: in place of an empty draft, or below one already
+  // started, unless the draft already holds it (the command was reopened on the same selection).
+  useEffect(() => {
+    if (!getPreferenceValues<Preferences.CreateCommit>().useSelectedText) return;
+    getSelectedText().then(
+      (text) => {
+        const selection = text.trim();
+        if (!selection) return;
+        setDraft((current) =>
+          !current.trim() ? selection : current.includes(selection) ? current : `${current.trimEnd()}\n\n${selection}`,
+        );
+      },
+      // Nothing selected, or no app to read it from.
+      () => undefined,
+    );
+  }, []);
 
   // Checking an image reads it from disk, so it runs after a change rather than during render.
   const imageKey = JSON.stringify(imagePaths);
@@ -83,6 +112,7 @@ export default function Command() {
         { log: (message, data) => logger.log(message, data) },
       );
       logger.log("Commit posted", result);
+      await rememberUsername(result.url);
       // The form stays open so the toast, and its link to the new commit, stay on screen.
       // Whatever the user changed while it posted is kept.
       if (latest.current.draft === submitted.draft) setDraft("");

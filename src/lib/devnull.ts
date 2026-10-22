@@ -149,7 +149,23 @@ async function findCandidates(home: string, sockets: string[]): Promise<Candidat
   return candidates.filter((candidate) => !seen.has(candidate.id) && seen.add(candidate.id));
 }
 
-async function request(url: string, init: RequestInit, log: Log, timeoutMs = REQUEST_TIMEOUT_MS): Promise<string> {
+/** A non-2xx answer. Its message is the server's body, trimmed. */
+export class HttpError extends Error {
+  constructor(
+    message: string,
+    readonly status: number,
+  ) {
+    super(message);
+    this.name = "HttpError";
+  }
+}
+
+export async function request(
+  url: string,
+  init: RequestInit,
+  log: Log,
+  timeoutMs = REQUEST_TIMEOUT_MS,
+): Promise<string> {
   const method = init.method ?? "GET";
   const started = performance.now();
   const elapsedMs = () => Math.round(performance.now() - started);
@@ -178,7 +194,10 @@ async function request(url: string, init: RequestInit, log: Log, timeoutMs = REQ
     bytes: Buffer.byteLength(body, "utf8"),
   });
   if (!response.ok) {
-    throw new Error(body.trim() || `Unexpected answer from ${new URL(url).origin} (HTTP ${response.status}).`);
+    throw new HttpError(
+      body.trim() || `Unexpected answer from ${new URL(url).origin} (HTTP ${response.status}).`,
+      response.status,
+    );
   }
   return body;
 }

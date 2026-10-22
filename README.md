@@ -23,7 +23,9 @@
 - **Works with your SSH agent**: finds keys in macOS's own agent, 1Password and Secretive, and in `~/.ssh`. It never reads a private key; your agent or `ssh-keygen` does the signing.
 - **Images**: attach up to 3 JPEG, PNG or WebP images to a commit.
 - **Ask Raycast AI to post for you**: "@dev-null post that I just launched my extension", with a screenshot attached to the message. You approve the text and images before anything is posted.
-- **Checked before it's sent**: the counter and the length limit match /dev/null's own rules (a link in your text counts as at most 23 characters; one inside code counts in full), and images are checked for type, size and dimensions, so a commit /dev/null would refuse is never signed or sent.
+- **Checked before it's sent**: the counter and the length limit match /dev/null's own rules (a link in your text counts as at most 23 characters; one inside code counts in full), and images are checked for type, size and dimensions, so a commit /dev/null would refuse for any of those is never signed or sent.
+- **Profiles and search**: look anyone up by username, browse their commits, replies, followers and following, or search everyone's commits. **Go to My Profile** and **My Commits** open your own.
+- **Start from a selection**: turn on **Selected Text** and Create Commit opens with whatever you had selected.
 - **Drafts survive**: close the form mid-thought and your draft and images are still there next time.
 - **A link to what you shipped**: after a commit lands, the toast's **Open Commit** opens it on /dev/null. If the commit is held for review, the toast says so.
 
@@ -109,6 +111,10 @@ Sign in at [dev-null.sh](https://dev-null.sh) with GitHub. This creates your acc
 | Command | Mode | Description |
 | --- | --- | --- |
 | Create Commit | `view` | Write a commit, sign it with your SSH key, and post it to /dev/null |
+| View Profile | `view` | Open someone's profile by username, or search for people |
+| Go to My Profile | `view` | Your profile, commits, replies, followers and following |
+| My Commits | `view` | The commits and replies you've posted |
+| Search Commits | `view` | Search everyone's commits. The search runs when you pause typing, from 3 characters, since /dev/null allows 15 searches a minute. |
 
 ### AI Tools
 
@@ -125,10 +131,20 @@ Sign in at [dev-null.sh](https://dev-null.sh) with GitHub. This creates your acc
 | Remove Attachments | `⌃ ⇧ X` | Remove the images and hide the picker |
 | Open Commit | `⌘ O`, or in the success toast | Open the commit you just posted. Appears once a commit has posted. |
 
+In a profile or a list of commits:
+
+| Action | Shortcut | Description |
+| --- | --- | --- |
+| Open Commit / View Profile | `⏎` | Open the commit on /dev/null, or the person's profile |
+| Copy Commit URL / Copy Profile URL | `⌘ ⇧ C` | Copy the link |
+| Show | Dropdown | Switch between commits and replies |
+
 ### Preferences
 
 | Preference | Values | Default |
 | --- | --- | --- |
+| Username | text | empty: the account of your last commit |
+| Selected Text (Create Commit) | checkbox | off |
 | Debug Logging | checkbox | off |
 | Strict Redaction | checkbox | off |
 
@@ -142,12 +158,19 @@ Sign in at [dev-null.sh](https://dev-null.sh) with GitHub. This creates your acc
 raycast-dev-null/
 ├── src/
 │   ├── create-commit.tsx   # The form: draft, images, counter, submit and toasts
+│   ├── view-profile.tsx    # A profile by username, or a people search
+│   ├── my-profile.tsx      # Your own profile
+│   ├── my-commits.tsx      # Your commits and replies
+│   ├── search-commits.tsx  # Search everyone's commits
+│   ├── username.ts         # Remembers your username from your last commit
+│   ├── components/         # Profile, commit and people views
 │   ├── tools/
 │   │   └── post-commit.ts  # The AI tool and its confirmation
 │   └── lib/
 │       ├── devnull.ts      # The /dev/null protocol: check, find a key, sign, post
 │       ├── body.ts         # /dev/null's rules for the text, and its character count
-│       └── images.ts       # /dev/null's rules for images
+│       ├── images.ts       # /dev/null's rules for images, and their sizes
+│       └── api.ts          # Reading profiles, commits, followers and search
 ├── ai.yaml                 # AI instructions and evals
 ├── assets/                 # Extension icon (runtime)
 ├── media/                  # README images

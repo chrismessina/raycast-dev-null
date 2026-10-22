@@ -5,6 +5,7 @@ import { LocalStorage, Tool } from "@raycast/api";
 import { normalizeBody } from "../lib/body";
 import { postCommit, prepareCommit } from "../lib/devnull";
 import { writePreview } from "../lib/images";
+import { rememberUsername } from "../username";
 
 type Input = {
   /**
@@ -97,6 +98,7 @@ export default async function tool(input: Input) {
   const commit = commitOf(input);
   const approvedImageHashes = await takeApproval(input);
   const result = await postCommit(commit, { log: (message, data) => logger.log(message, data), approvedImageHashes });
+  await rememberUsername(result.url);
   return {
     url: result.url,
     pendingReview: result.pending,
