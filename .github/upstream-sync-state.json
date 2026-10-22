@@ -1,0 +1,29 @@
+{
+  "upstream_commit": "31e8f1344349073aedee756d516cc0ddec5f230a",
+  "synced_at": "2026-10-22T15:52:03Z",
+  "files": {
+    ".gitignore": "98da5b3478ced5639ee1dc99a68c01110325bb23",
+    ".prettierrc": "3fb08e968934016b56874c5cb9171b9ac10e1ff3",
+    "AGENTS.md": "0d66818f6e72f9d0993b548d85be2dc3c700ab48",
+    "CHANGELOG.md": "8ecb814bb10d2663d1b40bd38bec4533d1fa66a1",
+    "LICENSE": "262a067eb1f9517d8abde3ecd5eeac8de359e701",
+    "README.md": "c31326ebb44384dce8da2169c65b88a853b8008a",
+    "ai.yaml": "a94cd0c29751f2c78189abc4485c4701b530d7ef",
+    "assets/extension-icon.png": "0cc508cde9bd6f4eb94b49bf98f3051fbb4edbcd",
+    "eslint.config.js": "543274e97eca65e51e691710591f6f5244117287",
+    "media/extension-icon.png": "0cc508cde9bd6f4eb94b49bf98f3051fbb4edbcd",
+    "metadata/dev-null-1.png": "bb0292fca324b7b1d1d8cf83a98845101d3bb2cc",
+    "package-lock.json": "ff41fd36f5ad57422724ff79b7d9158e77a24665",
+    "package.json": "eb5034990691d6a3a8f0d98c3b4e79869630da95",
+    "src/create-commit.tsx": "a6152b2e9ee3264805477abe250fb47e0023a580",
+    "src/lib/body.test.ts": "1c494778a09eb653a294cff86e31d15aca85bde2",
+    "src/lib/body.ts": "e4b4b4f69b5a47a49759f65480d6d64f92b67876",
+    "src/lib/devnull.test.ts": "4b08c2cdcd30ffdebfbddf25618989e9570d0b1d",
+    "src/lib/devnull.ts": "bb54542f3b741b42dce324ef15ed9c252909db77",
+    "src/lib/images.test.ts": "51f7594096144cbf81fc659912fa9da89809db4c",
+    "src/lib/images.ts": "f21393fa7f560db6d5f42ad4195a8ec7a3ebea6e",
+    "src/tools/post-commit.test.ts": "7f4f477fb34545f3c47b0f47e2ab7572891c54b7",
+    "src/tools/post-commit.ts": "1bd79b352ad4caf85861aae24c17524372315f7e",
+    "tsconfig.json": "6e219af7e3bbd0967b95105f3c718d5800f91dda"
+  }
+}
