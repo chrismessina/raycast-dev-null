@@ -21,7 +21,7 @@
 
 - **No login, no token**: /dev/null checks each commit's signature against the SSH keys GitHub publishes for your account, so there is nothing to sign in to or paste.
 - **Works with your SSH agent**: finds keys in macOS's own agent, 1Password and Secretive, and in `~/.ssh`. It never reads a private key; your agent or `ssh-keygen` does the signing.
-- **Images**: attach up to 3 JPEG, PNG or WebP images to a commit.
+- **Images**: attach up to 3 JPEG, PNG or WebP images to a commit, by picking them or from the clipboard with `⌘ ⇧ V`.
 - **Ask Raycast AI to post for you**: "@dev-null post that I just launched my extension", with a screenshot attached to the message. You approve the text and images before anything is posted.
 - **Checked before it's sent**: the counter and the length limit match /dev/null's own rules (a link in your text counts as at most 23 characters; one inside code counts in full), and images are checked for type, size and dimensions, so a commit /dev/null would refuse for any of those is never signed or sent.
 - **Profiles and search**: look anyone up by username, browse their commits, replies, followers and following, or search everyone's commits. **Go to My Profile** and **My Commits** open your own.
@@ -99,7 +99,7 @@ Sign in at [dev-null.sh](https://dev-null.sh) with GitHub. This creates your acc
 
 1. Open Raycast and search for **"Create Commit"**
 2. Write your commit. The counter in the bottom left (`12 of 4,000`) shows how much of the 4,000 characters you have used.
-3. To add images, press `⌘ N` (**Add Attachment**) and pick up to 3.
+3. To add images, press `⌘ N` (**Attach Image…**) and pick up to 3, or copy one and press `⌘ ⇧ V` (**Attach Image from Clipboard**).
 4. Press `⌘ ⏎` to sign and post it. If your SSH agent asks for Touch ID or an approval, give it.
 
 ---
@@ -127,8 +127,9 @@ Sign in at [dev-null.sh](https://dev-null.sh) with GitHub. This creates your acc
 | Action | Shortcut | Description |
 | --- | --- | --- |
 | Commit | `⌘ ⏎` | Sign the draft and post it |
-| Add Attachment | `⌘ N` | Show the image picker |
-| Remove Attachments | `⌃ ⇧ X` | Remove the images and hide the picker |
+| Attach Image… | `⌘ N` | Show the image picker |
+| Remove Images | `⌃ ⇧ X` | Remove the images and hide the picker |
+| Attach Image from Clipboard | `⌘ ⇧ V` | Attach the image on the clipboard: a copied image file, or image data such as a screenshot copied with `⌃ ⇧ ⌘ 4` |
 | Open Commit | `⌘ O`, or in the success toast | Open the commit you just posted. Appears once a commit has posted. |
 
 In a profile or a list of commits:

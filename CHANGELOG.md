@@ -6,6 +6,7 @@
 - **Go to My Profile** and **My Commits**: your own profile and commits. Set your username in the preferences, or post a commit and it's remembered.
 - **Search Commits**: search everyone's commits.
 - **Selected Text**: a new Create Commit preference that starts the commit with the text you had selected.
+- **Attach Image from Clipboard** (`⌘ ⇧ V`) in Create Commit attaches a copied image or screenshot. **Add Attachment** is now **Attach Image…**, and **Remove Attachments** is **Remove Images**.
 - Image sizes are now read from the image itself, without calling `sips`.
 
 ## [Initial Version] - 2026-10-22

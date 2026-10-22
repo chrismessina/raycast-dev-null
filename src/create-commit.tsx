@@ -1,9 +1,13 @@
+import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { failToast, showError } from "@chrismessina/raycast-kit";
 import { logger } from "@chrismessina/raycast-logger";
 import { useEffect, useRef, useState } from "react";
 import {
   Action,
   ActionPanel,
+  Clipboard,
+  environment,
   Form,
   getPreferenceValues,
   getSelectedText,
@@ -15,16 +19,22 @@ import {
 } from "@raycast/api";
 import { useCachedState } from "@raycast/utils";
 import { bodyCharacterCount, bodyError, MAX_BODY_LENGTH } from "./lib/body";
+import { saveClipboardImage } from "./lib/clipboard";
 import { postCommit } from "./lib/devnull";
 import { loadImages, MAX_IMAGES } from "./lib/images";
 import { rememberUsername } from "./username";
 
 const limit = MAX_BODY_LENGTH.toLocaleString("en-US");
+// Image data from the clipboard is saved here as PNG files, so it can be attached like any other image.
+const PASTED_DIR = join(environment.supportPath, "pasted");
+// ⌘V stays with the message field: Raycast gives an extension no paste event, so an action on ⌘V would take text
+// paste away from it.
+const ATTACH_FROM_CLIPBOARD: Keyboard.Shortcut = { modifiers: ["cmd", "shift"], key: "v" };
 
 export default function Command() {
   const [draft, setDraft] = useCachedState<string>("draft", "");
   const [imagePaths, setImagePaths] = useCachedState<string[]>("imagePaths", []);
-  const [showAttachments, setShowAttachments] = useState(imagePaths.length > 0);
+  const [showImagePicker, setShowImagePicker] = useState(imagePaths.length > 0);
   // Only the empty-submit message is state; the rest is derived from the draft, so a restored draft shows it too.
   const [emptyError, setEmptyError] = useState<string | undefined>();
   const [imageError, setImageError] = useState<string | undefined>();
@@ -72,9 +82,46 @@ export default function Command() {
     };
   }, [imageKey]);
 
-  function removeAttachments() {
+  function removeImages() {
     setImagePaths([]);
-    setShowAttachments(false);
+    setShowImagePicker(false);
+  }
+
+  // A file copied in Finder is attached as it is. Image data, such as a screenshot copied with ⌃⇧⌘4, is saved as a
+  // PNG first. Either way the image check runs on it like any picked file.
+  async function attachClipboardImage() {
+    if (imagePaths.length >= MAX_IMAGES) {
+      await showError(new Error(`A commit can carry up to ${MAX_IMAGES} images.`), { title: "Couldn't Attach Image" });
+      return;
+    }
+    const toast = await showToast({ style: Toast.Style.Animated, title: "Attaching image…" });
+    try {
+      const { file } = await Clipboard.read();
+      const copied = file?.startsWith("file://") ? fileURLToPath(file) : file;
+      const path =
+        copied && /\.(jpe?g|png|webp)$/i.test(copied) ? copied : await saveClipboardImage(PASTED_DIR, imagePaths);
+      if (!path) {
+        failToast(toast, new Error("Copy an image or an image file first."), {
+          title: "No Image on the Clipboard",
+        });
+        return;
+      }
+      // Checked again against the images as they are now: more may have been picked while this one was saved.
+      const current = latest.current.imagePaths;
+      if (!current.includes(path) && current.length >= MAX_IMAGES) {
+        failToast(toast, new Error(`A commit can carry up to ${MAX_IMAGES} images.`), {
+          title: "Couldn't Attach Image",
+        });
+        return;
+      }
+      if (!current.includes(path)) setImagePaths([...current, path]);
+      setShowImagePicker(true);
+      toast.style = Toast.Style.Success;
+      toast.title = "Image attached";
+    } catch (error) {
+      logger.error("Attach image from clipboard failed", error);
+      failToast(toast, error, { title: "Couldn't Attach Image" });
+    }
   }
 
   async function handleSubmit() {
@@ -116,7 +163,7 @@ export default function Command() {
       // The form stays open so the toast, and its link to the new commit, stay on screen.
       // Whatever the user changed while it posted is kept.
       if (latest.current.draft === submitted.draft) setDraft("");
-      if (JSON.stringify(latest.current.imagePaths) === submittedKey) removeAttachments();
+      if (JSON.stringify(latest.current.imagePaths) === submittedKey) removeImages();
       toast.style = Toast.Style.Success;
       toast.title = result.pending ? "Committed, pending review" : "Committed to /dev/null";
       toast.message = result.pending ? "Only you can see it until it's approved" : undefined;
@@ -142,21 +189,27 @@ export default function Command() {
       actions={
         <ActionPanel>
           <Action.SubmitForm icon={Icon.Upload} title="Commit" onSubmit={handleSubmit} />
-          {showAttachments ? (
+          {showImagePicker ? (
             <Action
               icon={Icon.Trash}
-              title="Remove Attachments"
+              title="Remove Images"
               shortcut={Keyboard.Shortcut.Common.RemoveAll}
-              onAction={removeAttachments}
+              onAction={removeImages}
             />
           ) : (
             <Action
               icon={Icon.Paperclip}
-              title="Add Attachment"
+              title="Attach Image…"
               shortcut={Keyboard.Shortcut.Common.New}
-              onAction={() => setShowAttachments(true)}
+              onAction={() => setShowImagePicker(true)}
             />
           )}
+          <Action
+            icon={Icon.Clipboard}
+            title="Attach Image from Clipboard"
+            shortcut={ATTACH_FROM_CLIPBOARD}
+            onAction={attachClipboardImage}
+          />
           {lastCommitUrl && (
             <Action.OpenInBrowser title="Open Commit" url={lastCommitUrl} shortcut={Keyboard.Shortcut.Common.Open} />
           )}
@@ -174,7 +227,7 @@ export default function Command() {
           setEmptyError(undefined);
         }}
       />
-      {showAttachments && (
+      {showImagePicker && (
         <Form.FilePicker
           id="images"
           title="Images"

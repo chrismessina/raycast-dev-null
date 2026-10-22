@@ -24,8 +24,8 @@
         {
           "name": "useSelectedText",
           "title": "Selected Text",
-          "label": "Start with the selected text",
-          "description": "A draft you already started keeps its text; the selection goes below.",
+          "label": "Use selected text for new commits",
+          "description": "Selected text is appended to a draft you already started.",
           "type": "checkbox",
           "required": false,
           "default": false
